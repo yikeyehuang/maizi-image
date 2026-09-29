@@ -37,6 +37,7 @@ jobs:
           --add-data "index.html;."
           app.py
 
+      # 注意：不要加 --specpath，否则 spec 里的相对路径 index.html 会从子目录解析而失败
       - name: 再打一个单文件版（方便自己用）
         run: >
           python -m PyInstaller --onefile --noconsole --clean
@@ -45,7 +46,6 @@ jobs:
           --version-file version_info.txt
           --distpath dist-single
           --workpath build-single
-          --specpath build-single
           --add-data "index.html;."
           app.py
 
