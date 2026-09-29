@@ -1,0 +1,9 @@
+# Python
+__pycache__/
+*.pyc
+build/
+dist/
+*.spec
+# 系统
+.DS_Store
+Thumbs.db

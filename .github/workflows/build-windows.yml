@@ -1,0 +1,50 @@
+name: 打包 Windows exe
+
+on:
+  workflow_dispatch:          # 在 Actions 页面手动点一下就跑
+  push:
+    branches: [main]
+    tags: ['v*']              # 打 tag 时顺便发 Release，得到永久下载链接
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    env:
+      PYTHONIOENCODING: utf-8
+    steps:
+      - name: 拉取代码
+        uses: actions/checkout@v4
+
+      - name: 安装 Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: 安装 PyInstaller
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install pyinstaller
+
+      - name: 打包成单文件 exe
+        run: python -m PyInstaller --onefile --noconsole --clean --name 麦子生图 --add-data "index.html;." app.py
+
+      - name: 检查产物
+        run: |
+          python -c "import os; f = os.listdir('dist'); print('dist files:', f); print('exe size MB: %.1f' % (os.path.getsize('dist/麦子生图.exe') / 1048576))"
+
+      - name: 上传产物（可在 Actions 页面下载）
+        uses: actions/upload-artifact@v4
+        with:
+          name: maizi-image-windows
+          path: dist/麦子生图.exe
+          if-no-files-found: error
+          retention-days: 90
+
+      - name: 发布 Release（仅打 tag 时执行，得到永久下载链接）
+        if: startsWith(github.ref, 'refs/tags/')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create ${{ github.ref_name }} "dist/麦子生图.exe" --title "麦子生图 ${{ github.ref_name }}" --generate-notes
