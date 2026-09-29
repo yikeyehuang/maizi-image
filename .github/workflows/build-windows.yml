@@ -28,18 +28,24 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install pyinstaller
 
-      - name: 打包成单文件 exe
-        run: python -m PyInstaller --onefile --noconsole --clean --name 麦子生图 --add-data "index.html;." app.py
+      - name: 打包（文件夹版，比单文件更难被误报）
+        run: >
+          python -m PyInstaller --onedir --noconsole --clean
+          --name 共济生图
+          --icon app.ico
+          --version-file version_info.txt
+          --add-data "index.html;."
+          app.py
 
       - name: 检查产物
         run: |
-          python -c "import os; f = os.listdir('dist'); print('dist files:', f); print('exe size MB: %.1f' % (os.path.getsize('dist/麦子生图.exe') / 1048576))"
+          python -c "import os; d='dist/共济生图'; f=sorted(os.listdir(d)); print('files:', f[:6]); print('exe MB: %.1f' % (os.path.getsize(d+'/共济生图.exe')/1048576)); print('total MB: %.1f' % (sum(os.path.getsize(os.path.join(r,x)) for r,_,fs in os.walk(d) for x in fs)/1048576))"
 
       - name: 上传产物（可在 Actions 页面下载）
         uses: actions/upload-artifact@v4
         with:
-          name: maizi-image-windows
-          path: dist/麦子生图.exe
+          name: gongji-image-windows
+          path: dist/共济生图/
           if-no-files-found: error
           retention-days: 90
 
@@ -47,4 +53,6 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/')
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release create ${{ github.ref_name }} "dist/麦子生图.exe" --title "麦子生图 ${{ github.ref_name }}" --generate-notes
+        run: |
+          Compress-Archive -Path "dist/共济生图/*" -DestinationPath "dist/共济生图-windows.zip" -Force
+          gh release create ${{ github.ref_name }} "dist/共济生图-windows.zip" --title "共济生图 ${{ github.ref_name }}" --generate-notes

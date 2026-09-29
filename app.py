@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-麦子 AI 生图 · 本地桌面版
+共济生图 · 本地桌面版
 
 双击运行 → 自动打开浏览器 → 首次填入 API Key → 直接生图。
 所有数据都留在本机（配置、生成记录、图片缓存）。
@@ -822,7 +822,7 @@ def main() -> int:
 
     url = f"http://127.0.0.1:{port}"
     log(f"数据目录 {DATA_HOME}")
-    log(f"麦子生图已启动：{url}")
+    log(f"共济生图已启动：{url}")
     threading.Thread(target=check_auth_async, daemon=True).start()      # 启动即校验密钥
 
     if open_browser:

@@ -1,7 +1,7 @@
 @echo off
 chcp 936 >nul
 cd /d "%~dp0"
-title ´ò°ü Âó×ÓÉúÍ¼.exe
+title ´ò°ü ¹²¼ÃÉúÍ¼
 
 where python >nul 2>nul
 if not %errorlevel%==0 (
@@ -14,11 +14,11 @@ python -m pip install --upgrade pip pyinstaller || (echo °²×°Ê§°Ü£¬¼ì²éÍøÂçºóÖØÊ
 
 echo.
 echo [2/3] ÕıÔÚ´ò°ü£¨Ô¼ 1-2 ·ÖÖÓ£¬ÇëÎğ¹Ø±Õ´°¿Ú£©¡­
-python -m PyInstaller --onefile --noconsole --clean --name Âó×ÓÉúÍ¼ --add-data "index.html;." app.py || (echo ´ò°üÊ§°Ü & pause & exit /b 1)
+python -m PyInstaller --onedir --noconsole --clean --name ¹²¼ÃÉúÍ¼ --icon app.ico --version-file version_info.txt --add-data "index.html;." app.py || (echo ´ò°üÊ§°Ü & pause & exit /b 1)
 
 echo.
 echo [3/3] Íê³É£¡
-echo   exe Î»ÖÃ£º %~dp0dist\Âó×ÓÉúÍ¼.exe
+echo   ³ÌĞòÎ»ÖÃ£º %~dp0dist\¹²¼ÃÉúÍ¼\¹²¼ÃÉúÍ¼.exe
 echo   °ÑÕâ¸ö exe ¿½µ½ÈÎºÎµØ·½Ë«»÷¼´¿ÉÊ¹ÓÃ£¨Ê×´Î»áÈÃÄãÌî API ÃÜÔ¿£©¡£
 echo.
 pause

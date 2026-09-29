@@ -1,0 +1,28 @@
+# PyInstaller 版本资源：让 exe 有明确的发布者/产品信息，能降低启发式误报评分
+VSVersionInfo(
+  ffi=FixedFileInfo(
+    filevers=(1, 0, 0, 0),
+    prodvers=(1, 0, 0, 0),
+    mask=0x3f,
+    flags=0x0,
+    OS=0x40004,
+    fileType=0x1,
+    subtype=0x0,
+    date=(0, 0)
+  ),
+  kids=[
+    StringFileInfo([
+      StringTable('080404B0', [
+        StringStruct('CompanyName', '共济生图'),
+        StringStruct('FileDescription', '共济生图 - 本地 AI 生图工具'),
+        StringStruct('FileVersion', '1.0.0.0'),
+        StringStruct('InternalName', 'gongji-image'),
+        StringStruct('OriginalFilename', '共济生图.exe'),
+        StringStruct('ProductName', '共济生图'),
+        StringStruct('ProductVersion', '1.0.0.0'),
+        StringStruct('LegalCopyright', '本地运行，密钥与数据均保存在本机')
+      ])
+    ]),
+    VarFileInfo([VarStruct('Translation', [2052, 1200])])
+  ]
+)

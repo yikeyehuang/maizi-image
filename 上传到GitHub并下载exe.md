@@ -1,6 +1,6 @@
 # 上传到 GitHub，云端自动打出 exe
 
-目标：**本机完全不用装 Python**，在 GitHub 云端把 `麦子生图.exe` 打出来，你下载即可。
+目标：**本机完全不用装 Python**，在 GitHub 云端把 `共济生图.exe` 打出来，你下载即可。
 
 > ⚠️ exe 只能在 Windows 上打包，所以走云端（GitHub 免费提供 Windows 机器）。
 
@@ -35,7 +35,7 @@
 5. 点仓库顶部 **Actions** 标签 → 左侧选 **打包 Windows exe** → 右侧 **Run workflow → Run workflow**；
 
 6. 等约 **1~2 分钟**（刷新页面看进度），跑完后：
-   - 点进那次运行，页面底部 **Artifacts** 区域下载 **maizi-image-windows**（是个 zip，解压得到 `麦子生图.exe`）；
+   - 点进那次运行，页面底部 **Artifacts** 区域下载 **maizi-image-windows**（是个 zip，解压得到 `共济生图.exe`）；
    - 产物保留 **90 天**，过期就再跑一次。
 
 ---
@@ -71,7 +71,7 @@ git tag v1.0
 git push origin v1.0
 ```
 
-之后在仓库 **Releases** 页面就能看到 `麦子生图.exe`，链接长期有效，可以直接发给别人下载。
+之后在仓库 **Releases** 页面就能看到 `共济生图.exe`，链接长期有效，可以直接发给别人下载。
 
 ---
 
