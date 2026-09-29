@@ -274,6 +274,19 @@ def history_view() -> list:
     return records
 
 
+def reveal_in_folder(target: Path) -> None:
+    """在系统文件管理器里选中该文件（Windows / macOS / Linux 各自实现）。"""
+    try:
+        if os.name == "nt":
+            subprocess.run(["explorer", "/select,", str(target)], check=False)
+        elif sys.platform == "darwin":
+            subprocess.run(["open", "-R", str(target)], check=False)
+        else:
+            subprocess.Popen(["xdg-open", str(target.parent)])
+    except Exception:  # noqa: BLE001 - 打不开文件夹不该让请求失败
+        pass
+
+
 def local_image(rec: dict):
     """取这条记录的本地图片路径（找不到返回 None）。"""
     for im in rec.get("images") or []:
@@ -705,7 +718,7 @@ class Handler(BaseHTTPRequestHandler):
                 target = local_image(rec) if rec else None
                 if target is None:
                     raise RuntimeError("本地还没有这张图（可能仍在下载，或当初没存下来）")
-                subprocess.run(["open", "-R", str(target)], check=False)  # macOS：在 Finder 里选中
+                reveal_in_folder(target)
                 self.send_json({"ok": True, "path": str(target)})
             elif path == "/api/settings":
                 body = json.loads(self.body() or b"{}")
