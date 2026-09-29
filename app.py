@@ -128,7 +128,7 @@ def save_api_key(key: str) -> None:
         data = {}
     data["apiKey"] = key
     data.setdefault("baseURL", DEFAULT_BASE)
-    data.setdefault("model", FALLBACK_MODEL)
+    data.setdefault("model", MODEL_ORDER[0])      # 默认「标准版」，不是增强版
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
 
@@ -527,6 +527,21 @@ def check_auth_async() -> None:
     _set_auth(status=status, error=err, checked_at=time.time())
 
 
+def _update_cached_default(model_id: str) -> None:
+    """用户切了模型：把内存/磁盘缓存里的 default 一起改掉，避免下次读到的还是旧默认值。"""
+    _model_cache.clear()
+    try:
+        data = json.loads(_MODEL_CACHE_FILE.read_text(encoding="utf-8"))
+    except Exception:  # noqa: BLE001
+        return
+    if any(m.get("id") == model_id for m in data.get("models", [])):
+        data["default"] = model_id
+        try:
+            _MODEL_CACHE_FILE.write_text(json.dumps(data, ensure_ascii=False), encoding="utf-8")
+        except Exception:  # noqa: BLE001
+            pass
+
+
 def catalog() -> dict:
     """授权模型 + 规格。绝不阻塞：先给内存/磁盘里的旧值，后台再刷新。"""
     import time
@@ -746,8 +761,9 @@ class Handler(BaseHTTPRequestHandler):
                 self.send_json({"ok": True})
                 threading.Thread(target=lambda: (time.sleep(0.3), server_ref[0] and server_ref[0].shutdown()), daemon=True).start()
             elif path == "/api/model":
-                save_model(json.loads(self.body() or b"{}").get("model", ""))
-                _model_cache.clear()
+                chosen = str(json.loads(self.body() or b"{}").get("model", ""))
+                save_model(chosen)
+                _update_cached_default(chosen)     # 缓存里的 default 一起改，下次读到就是新值
                 self.send_json({"ok": True})
             elif path == "/api/upload":
                 cfg = config()

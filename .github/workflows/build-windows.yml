@@ -37,15 +37,35 @@ jobs:
           --add-data "index.html;."
           app.py
 
+      - name: 再打一个单文件版（方便自己用）
+        run: >
+          python -m PyInstaller --onefile --noconsole --clean
+          --name 共济生图-单文件
+          --icon app.ico
+          --version-file version_info.txt
+          --distpath dist-single
+          --workpath build-single
+          --specpath build-single
+          --add-data "index.html;."
+          app.py
+
       - name: 检查产物
         run: |
-          python -c "import os; d='dist/共济生图'; f=sorted(os.listdir(d)); print('files:', f[:6]); print('exe MB: %.1f' % (os.path.getsize(d+'/共济生图.exe')/1048576)); print('total MB: %.1f' % (sum(os.path.getsize(os.path.join(r,x)) for r,_,fs in os.walk(d) for x in fs)/1048576))"
+          python -c "import os; d='dist/共济生图'; f=sorted(os.listdir(d)); print('folder files:', f[:6]); print('exe MB: %.1f' % (os.path.getsize(d+'/共济生图.exe')/1048576)); print('total MB: %.1f' % (sum(os.path.getsize(os.path.join(r,x)) for r,_,fs in os.walk(d) for x in fs)/1048576)); s='dist-single/共济生图-单文件.exe'; print('single MB: %.1f' % (os.path.getsize(s)/1048576))"
 
       - name: 上传产物（可在 Actions 页面下载）
         uses: actions/upload-artifact@v4
         with:
-          name: gongji-image-windows
+          name: gongji-image-folder
           path: dist/共济生图/
+          if-no-files-found: error
+          retention-days: 90
+
+      - name: 上传产物 · 单文件版（方便自己用）
+        uses: actions/upload-artifact@v4
+        with:
+          name: gongji-image-single
+          path: dist-single/共济生图-单文件.exe
           if-no-files-found: error
           retention-days: 90
 
@@ -55,4 +75,4 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           Compress-Archive -Path "dist/共济生图/*" -DestinationPath "dist/共济生图-windows.zip" -Force
-          gh release create ${{ github.ref_name }} "dist/共济生图-windows.zip" --title "共济生图 ${{ github.ref_name }}" --generate-notes
+          gh release create ${{ github.ref_name }} "dist/共济生图-windows.zip" "dist-single/共济生图-单文件.exe" --title "共济生图 ${{ github.ref_name }}" --generate-notes

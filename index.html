@@ -482,7 +482,12 @@ function buildSegments() {
     b.textContent = m.label || m.id;
     b.className = m.id === currentId ? 'active' : '';
     b.title = m.id;
-    b.onclick = () => { if (m.id !== currentId) { currentId = m.id; syncModel(); } };
+    b.onclick = () => {
+      if (m.id === currentId) return;
+      currentId = m.id; syncModel();
+      fetch('/api/model', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ model: m.id }) }).catch(() => {});   // 记住选择，下次打开还是它
+    };
     el.appendChild(b);
   });
 }
