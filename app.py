@@ -137,6 +137,7 @@ def save_model(model: str) -> None:
     path = CONFIG_PATHS[0]
     data = json.loads(path.read_text(encoding="utf-8")) if path.is_file() else {}
     data["model"] = model
+    data["modelChosen"] = True      # 标记：这是用户自己选的，别再回退默认值
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
 
@@ -400,6 +401,18 @@ def api(path: str, payload=None, timeout: float = 300, raw: bool = False, key: s
         raise ApiError(exc.code, f"HTTP {exc.code} {hint}: {detail}")
 
 
+def effective_model(cfg: dict | None = None) -> str:
+    """当前生效的默认模型。
+
+    只有用户**显式切换过**（配置里带 modelChosen: true）才用配置里的值；
+    否则一律返回标准版 —— 这样老版本配置里残留的「增强版」会自动纠正。
+    """
+    cfg = cfg or config()
+    if cfg.get("modelChosen") is True and cfg.get("model"):
+        return str(cfg["model"])
+    return MODEL_ORDER[0]
+
+
 def model_spec(model_id: str, record: dict) -> dict:
     """把 /v1/models 的记录 + 型号页的精确限制，整理成前端要的规格。"""
     limits = MODEL_LIMITS.get(model_id, {})
@@ -584,13 +597,13 @@ def _refresh_sync() -> dict:
         allowed = limits.get("available_models") or []
         records = {m["id"]: m for m in api("/v1/models", timeout=12).get("data", [])}
     except Exception as exc:  # noqa: BLE001 - 断网/超时也要能用表单
-        value = {"models": fallback_models, "default": config()["model"] if any(m["id"] == config()["model"] for m in fallback_models) else fallback_models[0]["id"],
+        value = {"models": fallback_models, "default": effective_model() if any(m["id"] == effective_model() for m in fallback_models) else fallback_models[0]["id"],
                  "warning": f"接口暂不可达（{exc}），显示的是上次已知配置"}
         _model_cache.update(at=time.time() - 30, value=value)  # 半分钟后重试
         return value
     order = [m for m in MODEL_ORDER if m in allowed] + [m for m in allowed if m not in MODEL_ORDER]
     specs = [model_spec(mid, records.get(mid, {})) for mid in order] or fallback_models
-    configured = config()["model"]
+    configured = effective_model()
     value = {"models": specs, "default": configured if any(s["id"] == configured for s in specs) else specs[0]["id"]}
     _model_cache.update(at=time.time(), value=value)
     _save_model_cache_file(value)      # 落盘：下次冷启动秒开
@@ -700,7 +713,7 @@ class Handler(BaseHTTPRequestHandler):
                 # 模型由分段控制器指定；只接受当前 Key 授权过的，其余落到配置默认值
                 allowed = {s["id"] for s in catalog()["models"]}
                 chosen = str(payload.get("model") or "")
-                payload["model"] = chosen if chosen in allowed else config()["model"]
+                payload["model"] = chosen if chosen in allowed else effective_model()
                 if not payload.get("images"):
                     payload.pop("images", None)
                 # 中文标签 → 接口取值；"自动" 表示不指定，直接不发这个字段
