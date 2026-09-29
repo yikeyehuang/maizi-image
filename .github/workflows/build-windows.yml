@@ -49,6 +49,9 @@ jobs:
           --add-data "index.html;."
           app.py
 
+      - name: 附上「清除本地数据」脚本（文件夹版一起分发）
+        run: Copy-Item "清除本地数据.bat" "dist/共济生图/清除本地数据.bat"
+
       - name: 检查产物
         run: |
           python -c "import os; d='dist/共济生图'; f=sorted(os.listdir(d)); print('folder files:', f[:6]); print('exe MB: %.1f' % (os.path.getsize(d+'/共济生图.exe')/1048576)); print('total MB: %.1f' % (sum(os.path.getsize(os.path.join(r,x)) for r,_,fs in os.walk(d) for x in fs)/1048576)); s='dist-single/共济生图-单文件.exe'; print('single MB: %.1f' % (os.path.getsize(s)/1048576))"
